@@ -1,12 +1,18 @@
 # Emplea.do
 
+Production CI Build Status
+
+[![Build status](https://dev.azure.com/megsoft/EmpleaDo%20Build%20System/_apis/build/status/Emplea.do%20Production/emplea.do%20-%20CI%20Build%20Prod)](https://dev.azure.com/megsoft/EmpleaDo%20Build%20System/_build/latest?definitionId=30)
+
+Beta CI Build Status
+
 [![Build Status](https://dev.azure.com/megsoft/EmpleaDo%20Build%20System/_apis/build/status/Emplea.Do%20Beta/beta.emplea.do%20-%20PR%20Builds?branchName=development)](https://dev.azure.com/megsoft/EmpleaDo%20Build%20System/_build/latest?definitionId=26&branchName=development)
 
 ## Getting the project up and running
 
 ### Install the following software
 
-- [.NET SDK](https://www.microsoft.com/net/learn/get-started/)
+- [.NET SDK](https://dotnet.microsoft.com/download)
 - [Visual Studio Code](https://code.visualstudio.com)
 - [Visual Studio Community](https://visualstudio.microsoft.com/es/vs/)
 
@@ -59,16 +65,32 @@ Example:`"Data Source=C:\\CODE\\emplea_do\\mydb.db;"`
 
 ## Slack Configuration
 
-To configure your own slackservice just follow the [Official](https://api.slack.com/messaging/webhooks#getting_started) to get started. After you completed slack configuration, you should have a **token** and a **workspace section**, with a Webhook URL that'll look something like this `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`, you should only be interested in `T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX` (because that is what we are going to use in the appsetting).
+To configure your own SlackService just follow the [Official](https://api.slack.com/messaging/webhooks#getting_started) to get started. After you completed slack configuration, you should have a **token** and a **workspace section**, with a Webhook URL that'll look something like this `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`, you should only be interested in `T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX` (because that is what we are going to use in the appsetting).
 
-Now add your **token** with key `"slackVerificationToken"` and **workspace section** with key `"slackWebhookEndpoint"` in `appsettings.json`.
+Now add your **token** with key `"VerificationToken"` and **workspace section** with key `"WebhookEndpoint"` to the slack section in `appsettings.development.json`.
 
 ## If you have any questions or just want to hang out
 
-- We have a [slack channel](https://empleado-slack.azurewebsites.net)
+- We have a [slack channel](https://join.slack.com/t/empleado/shared_invite/zt-g630paqe-KNb0DctptHqH6Ch~zDdGog)
 
+## Powered By
+
+- [.Net Core](https://www.microsoft.com/net/learn/get-started/)
+- [Azure DevOps](https://azure.microsoft.com/en-us/services/devops/)
+- [Azure](https://azure.com)
+- [JetBrains](https://www.jetbrains.com/?from=emplea.do)
+- [Our community](https://github.com/Emplea-do/emplea_do/graphs/contributors)
+- [Visual Studio & Visual Studio Code](https://visualstudio.microsoft.com/)
+
+<div align="center">
+  <img src="docs/images/poweredbylogos/dotnet.svg" width="100" alt=".Net"/>
+  <img src="docs/images/poweredbylogos/azure.png" width="100" alt="Azure" style="margin-left:10px;"/>
+  <img src="docs/images/poweredbylogos/azuredevops.png" width="100" alt="Azure devops" style="margin-left:10px;"/>
+  <img src="docs/images/poweredbylogos/jetbrains.png" width="100" alt="Jetbrains" style="margin-left:10px;"/>
+  <img src="docs/images/poweredbylogos/visualstudio.png" width="100" alt="Visual Studio" style="margin-left:10px;"/>
+  <img src="docs/images/poweredbylogos/visualstudiocode.svg" width="100" alt="Visual Studio Code" style="margin-left:10px;"/>
+</div>
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details
-

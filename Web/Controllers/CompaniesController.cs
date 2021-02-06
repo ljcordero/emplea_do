@@ -14,14 +14,15 @@ using Domain.Entities;
 
 namespace Web.Controllers
 {
-    [Authorize]
     public class CompaniesController : BaseController
     {
         private readonly ICompaniesService _companiesService;
+        private readonly IJobsService _jobService;
 
-        public CompaniesController(ICompaniesService companiesService)
+        public CompaniesController(ICompaniesService companiesService, IJobsService jobsService)
         {
             _companiesService = companiesService;
+            _jobService = jobsService;
         }
 
         public IActionResult Index()
@@ -30,7 +31,7 @@ namespace Web.Controllers
             return View(companies);
         }
         
-                [Authorize]
+        [Authorize]
         public IActionResult Wizard(int? id)
         {
             var model = new CompanyViewModel();
@@ -57,7 +58,7 @@ namespace Web.Controllers
             return View(model);
         }
 
-         [Authorize]
+        [Authorize]
         [HttpPost]
         public IActionResult Wizard(CompanyViewModel model)
         {
@@ -157,6 +158,19 @@ namespace Web.Controllers
             }
             
             return Json(result);
+        }
+
+        [HttpGet("Company/{Id}")]
+        [AllowAnonymous]
+        public IActionResult Jobs(int Id)
+        {
+            var model = new CompanyJobsViewModel
+            {
+                Jobs = _jobService.GetAllByCompanyId(Id),
+                Company = _companiesService.GetById(Id)
+            };
+
+            return View(model);
         }
     }
 }

@@ -35,7 +35,9 @@ namespace Web.Controllers
         private readonly ICompaniesService _companiesService;
         private readonly ISlackService _slackService;
 
-        public JobsController(IJobsService jobsService, ICategoriesService categoriesService, IHireTypesService hiretypesService, ITwitterService twitterService, LegacyApiClient apiClient, IConfiguration configuration, ICompaniesService companiesService, ISlackService slackService)
+        public JobsController(IJobsService jobsService, ICategoriesService categoriesService, IHireTypesService hiretypesService,
+            ITwitterService twitterService, LegacyApiClient apiClient, IConfiguration configuration,
+            ICompaniesService companiesService, ISlackService slackService)
         {
             _jobsService = jobsService;
             _categoriesService = categoriesService;
@@ -75,13 +77,13 @@ namespace Web.Controllers
             {
                 Categories = _categoriesService.GetAll(),
                 JobTypes = _hiretypesService.GetAll(),
-                Companies  = _companiesService.GetByUserId(_currentUser.UserId)
+                Companies = _companiesService.GetByUserId(_currentUser.UserId)
             };
 
             if (id.HasValue)
             {
                 var originalJob = _jobsService.GetById(id.Value);
-                if(originalJob.UserId == _currentUser.UserId)
+                if (originalJob.UserId == _currentUser.UserId)
                 {
                     model.Id = originalJob.Id;
                     model.CompanyId = originalJob.Company.Id;
@@ -98,7 +100,7 @@ namespace Web.Controllers
                     model.LocationLongitude = originalJob.Location.Longitude;
                 }
                 else
-                { 
+                {
                     return RedirectToAction("Index", "Home").WithError("No tienes permiso para editar esta posición");
                 }
             }
@@ -146,7 +148,7 @@ namespace Web.Controllers
                     if (model.Id.HasValue)
                     {
                         var originalJob = _jobsService.GetById(model.Id.Value);
-                        if(originalJob.UserId == _currentUser.UserId)
+                        if (originalJob.UserId == _currentUser.UserId)
                         {
 
                             originalJob.CategoryId = model.CategoryId;
@@ -157,8 +159,8 @@ namespace Web.Controllers
                             originalJob.Title = model.Title;
                             originalJob.IsRemote = model.IsRemote;
                             originalJob.IsApproved = false;
-                            if(originalJob.Location.PlaceId != model.LocationPlaceId)
-                            { 
+                            if (originalJob.Location.PlaceId != model.LocationPlaceId)
+                            {
                                 originalJob.Location = new Location
                                 {
                                     PlaceId = model.LocationPlaceId,
@@ -230,7 +232,7 @@ namespace Web.Controllers
                     }
 
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     HttpContext.RiseError(ex);
                     return View(model).WithError(ex.Message);
@@ -249,7 +251,8 @@ namespace Web.Controllers
             if (isLegacy)
             {
                 var legacyJob = await _apiClient.GetJobById(Id);
-                if(legacyJob != null) { 
+                if (legacyJob != null)
+                {
                     job = new Job()
                     {
                         Company = new Company()
@@ -279,7 +282,7 @@ namespace Web.Controllers
             }
             else
             {
-               job = this._jobsService.GetDetails(jobId, isPreview);
+                job = this._jobsService.GetDetails(jobId, isPreview);
             }
 
             if (job == null)
@@ -288,15 +291,31 @@ namespace Web.Controllers
             ViewBag.Title = job.Title;
             ViewBag.Description = job.Description;
             var viewModel = new JobDetailsViewModel
-            {   
+            {
                 Job = job,
-                IsJobOwner = (job.UserId == _currentUser.UserId)
+                IsJobOwner = _currentUser.IsAuthenticated && job.UserId == _currentUser.UserId
             };
 
-            if(!isLegacy)
-            { 
-                job.ViewCount++;
-                _jobsService.Update(job);
+            if (!isLegacy)
+            {
+                //Get the list of jobs visited in the cookie
+                //Format: comma separated jobs Id
+                //Naming: appname_meanfulname
+                var visitedJobs = Request.Cookies["empleado_visitedjobs"];
+
+                //If cookie value is null (not set) use empty string to avoid NullReferenceException
+                var visitedJobsList = (visitedJobs ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                //If jobs has not be visited update ViewCount & add job Id to cookie
+                if (!visitedJobsList.Contains(Id))
+                {
+                    job.ViewCount++;
+                    _jobsService.Update(job);
+
+                    visitedJobs = string.Join(",", visitedJobsList.Append(Id));
+                }
+
+                Response.Cookies.Append("empleado_visitedjobs", visitedJobs);
             }
 
             if (isPreview)
@@ -344,7 +363,7 @@ namespace Web.Controllers
             }
             return Json(result);
         }
-        
+
         [Authorize]
         [HttpPost]
         public JsonResult Delete(int id)
@@ -354,18 +373,18 @@ namespace Web.Controllers
             {
                 var job = _jobsService.GetById(id);
 
-                if(job == null)
+                if (job == null)
                 {
                     result.AddErrorMessage("No puedes eliminar un puesto que no existe.");
                 }
-                else if(job.UserId == _currentUser.UserId)
+                else if (job.UserId == _currentUser.UserId)
                 {
                     if (!job.IsActive)
                     {
                         result.AddErrorMessage("El puesto que intentas eliminar ya está eliminado.");
                     }
                     else
-                    { 
+                    {
                         result = _jobsService.Delete(job);
                     }
                 }
@@ -374,7 +393,7 @@ namespace Web.Controllers
                     result.AddErrorMessage("No puedes eliminar un puesto que no creaste.");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 HttpContext.RiseError(ex);
                 result.AddErrorMessage(ex.Message);
@@ -395,8 +414,8 @@ namespace Web.Controllers
             try
             {
                 var data = JsonConvert.DeserializeObject<PayloadResponseDto>(payload);
-                
-                if(data == null)
+
+                if (data == null)
                 {
                     throw new Exception($"Payload is null, Body: {payload}");
                 }
@@ -415,11 +434,11 @@ namespace Web.Controllers
                     await _slackService.PostJobResponse(jobOpportunity, Url, data.response_url, data?.user?.id, true);
 
                     try
-                    { 
-                        var tweetText = jobOpportunity.Title + " " + Url.AbsoluteUrl("Details", "Jobs", new { Id=jobOpportunityId });
+                    {
+                        var tweetText = jobOpportunity.Title + " " + Url.AbsoluteUrl("Details", "Jobs", new { Id = jobOpportunityId });
                         await _twitterService.Tweet(tweetText);
                     }
-                    catch(Exception tweetException)
+                    catch (Exception tweetException)
                     {
                         HttpContext.RiseError(tweetException);
                         if (tweetException.InnerException != null)
@@ -446,10 +465,9 @@ namespace Web.Controllers
             catch (Exception ex)
             {
                 HttpContext.RiseError(ex);
-                if(ex.InnerException != null)
+                if (ex.InnerException != null)
                     HttpContext.RiseError(ex.InnerException);
             }
         }
-
     }
 }
